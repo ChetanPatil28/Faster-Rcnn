@@ -45,3 +45,43 @@ def find_anchorV2(centres,ratios,scales,sub_sample=16):
     anchor_basee[:,2]=cy + h / 2.
     anchor_basee[:,3]=cx + w / 2.
     return anchor_basee
+
+def find_iou(num_anchors=0,num_bbox=0):
+    iou=np.zeros(shape=(num_anchors,num_bbox),dtype=np.float32)
+    for i in range(len(bbox)):
+        print(bbox[i])
+        min_xy = np.minimum(valid_anchor_boxes[:,2:], bbox[i,2:])
+        max_xy = np.maximum(valid_anchor_boxes[:,:2], bbox[i,:2])
+        inter=(max_xy[:,0]-min_xy[:,0])*(max_xy[:,1]-min_xy[:,1])
+        valid_ones=np.where((max_xy[:, 0] < min_xy[:, 0]) & (max_xy[:, 1] < min_xy[:, 1]) )[0]
+        print(valid_ones.shape)
+        area1=(valid_anchor_boxes[:,2]-valid_anchor_boxes[:,0])*(valid_anchor_boxes[:,3]-valid_anchor_boxes[:,1])
+        area2=(bbox[i,2]-bbox[i,0])*(bbox[i,3]-bbox[i,1])
+        iouu=inter/(area1+area2-inter)
+        iouu=iouu[valid_ones]
+        iou[valid_ones,i]=iouu
+    return iou
+
+def mini_batch(pos_ratio = 0.5,n_sample = 256,label):
+    n_pos = pos_ratio * n_sample
+    pos_index = np.where(label == 1)[0]
+    if len(pos_index) > n_pos:
+        disable_index = np.random.choice(pos_index, size=(len(pos_index) - int(n_pos)), replace=False)
+        label[disable_index] = -1
+    ### 2. negative_labels
+    n_neg = n_sample * np.sum(label == 1)
+    #n_neg=128
+    ### why havent we used n_neg also as 128 ??? instead n_neg is a bigggggg number 
+    neg_index = np.where(label == 0)[0]
+    if len(neg_index) > n_neg:
+       # print("aws")
+        disable_indexi = np.random.choice(neg_index, size=(len(neg_index) - int(n_neg)), replace = False)
+        label[disable_indexi] = -1
+    return label
+
+def convert_boxes(boxes):
+    height = boxes[:, 2] - boxes[:, 0]
+    width = boxes[:, 3] - boxes[:, 1]
+    ctr_y = boxes[:, 0] + 0.5 * base_height
+    ctr_x = boxes[:, 1] + 0.5 * base_width
+    return height, width,ctr_y,ctr_x
