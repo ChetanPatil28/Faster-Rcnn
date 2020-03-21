@@ -2,9 +2,12 @@ from RPN.MobileNetV2 import MobileNetV2
 from RPN.rpn_layer import rpn
 import torch
 import torch.nn as nn
+imort os
 
 mbnet = MobileNetV2(n_class=1000)
-path='C:/Users/Dell/PycharmProjects/pytorch-cnn-visualizations/src/mobilenet_v2.pth.tar'
+bbone_path = "mobilenet_v2.pth.tar"
+
+path = os.path.join(os.getcwd(), bbone_path)
 state_dict = torch.load(path,map_location='cpu')
 mbnet.load_state_dict(state_dict)
 
