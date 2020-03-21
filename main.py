@@ -136,5 +136,4 @@ for _ in range(2):
     Loss.backward()
     optimizer.step()
 
-    print(Loss, C_loss,R_loss)
-
+    print("Losses of RPN are ",Loss, C_loss,R_loss)
